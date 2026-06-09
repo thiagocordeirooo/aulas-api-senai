@@ -5,7 +5,7 @@ const dbConfig = {
   port: process.env.MYSQL_PORT || "3306",
   user: process.env.MYSQL_USER || "root",
   password: process.env.MYSQL_PWD || "root",
-  database: process.env.MYSQL_DB || "aulas_api_senai",
+  database: process.env.MYSQL_DB || "aula_integrada",
 };
 
 class ConexaoMySql {
