@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { getPool } from "../database/ConexaoPostgres.js";
-import { calcularHashApiKey, gerarApiKey } from "../utils/apiKey.js";
+import { gerarApiKey } from "../utils/apiKey.js";
 
 const criarTenantSchema = z.object({
   nome: z.string().trim().min(2).max(120),
@@ -19,32 +19,20 @@ class TenantsController {
     }
 
     try {
-      const pool = getPool();
+      const apiKey = gerarApiKey();
 
-      // Uma colisão de prefixo é improvável, mas é tratada para preservar a unicidade.
-      for (let tentativa = 0; tentativa < 3; tentativa += 1) {
-        const { chave, prefixo } = gerarApiKey();
-        const hash = calcularHashApiKey(chave);
+      const { rows } = await getPool().query(
+        `insert into tenants (nome, api_key_hash)
+         values ($1, $2)
+         returning id, nome, status, created_at`,
+        [dados.data.nome, apiKey]
+      );
 
-        try {
-          const { rows } = await pool.query(
-            `insert into tenants (nome, api_key_prefix, api_key_hash)
-             values ($1, $2, $3)
-             returning id, nome, api_key_prefix, status, created_at`,
-            [dados.data.nome, prefixo, hash]
-          );
-
-          return resp.status(201).json({
-            tenant: rows[0],
-            apiKey: chave,
-            mensagem: "Guarde a API key agora: ela não poderá ser consultada novamente.",
-          });
-        } catch (error) {
-          if (error.code !== "23505" || tentativa === 2) {
-            throw error;
-          }
-        }
-      }
+      return resp.status(201).json({
+        tenant: rows[0],
+        apiKey,
+        mensagem: "Guarde a API key agora: ela não poderá ser consultada novamente.",
+      });
     } catch (error) {
       console.error("Erro ao criar tenant:", error);
       return resp.status(500).json({ mensagem: "Não foi possível criar o tenant." });

@@ -17,7 +17,7 @@ senha: ela é mostrada somente uma vez e deve ser enviada em todas as chamadas
 para `/v1`.
 
 ```http
-X-API-Key: ak_12345678_sua-chave-fornecida-pelo-professor
+X-API-Key: sua-chave-fornecida-pelo-professor
 ```
 
 Você pode consultar a interface interativa em [http://localhost:3000/docs](http://localhost:3000/docs).

@@ -1,29 +1,18 @@
-import { calcularHashApiKey } from "../utils/apiKey.js";
 import { getPool } from "../database/ConexaoPostgres.js";
-
-function obterPrefixo(chave) {
-  const resultado = /^((ak_[a-f0-9]{8}))_[A-Za-z0-9_-]+$/.exec(chave);
-  return resultado?.[1] || null;
-}
 
 export default async function validarApiKey(req, resp, next) {
   const chave = req.headers["x-api-key"];
 
-  if (typeof chave !== "string") {
+  if (typeof chave !== "string" || chave.trim() === "") {
     return resp.status(401).json({ mensagem: "O cabeçalho X-API-Key é obrigatório." });
-  }
-
-  const prefixo = obterPrefixo(chave);
-  if (!prefixo) {
-    return resp.status(401).json({ mensagem: "API key inválida." });
   }
 
   try {
     const { rows } = await getPool().query(
       `select id, nome, status
        from tenants
-       where api_key_prefix = $1 and api_key_hash = $2 and status = 'ativo'`,
-      [prefixo, calcularHashApiKey(chave)]
+       where api_key_hash = $1 and status = 'ativo'`,
+      [chave.trim()]
     );
 
     if (rows.length === 0) {
