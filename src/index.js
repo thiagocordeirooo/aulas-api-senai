@@ -26,6 +26,7 @@ const _tenantsController = new TenantsController();
 const _documentosController = new DocumentosController();
 
 // rotas públicas
+app.get("/", (_req, resp) => resp.redirect(302, "/docs/"));
 app.get("/health", (_req, resp) => resp.status(200).json({ status: "ok" }));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi, { explorer: true }));
 app.post("/login", limiteLogin, _autenticacaoController.login);
