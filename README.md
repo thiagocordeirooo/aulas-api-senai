@@ -22,6 +22,11 @@ A próxima versão usa PostgreSQL (Supabase). Configure `DATABASE_URL`,
 Postgres, validação, bcrypt, rate limiting e Swagger já estão preparadas; as
 rotas MySQL atuais permanecem temporariamente disponíveis durante a migração.
 
+Com a API em execução, consulte a documentação dos alunos em `/docs` e use
+`GET /health` no health check do deploy. Defina `CORS_ORIGIN` com uma ou mais
+origens separadas por vírgula fora do ambiente local; `*` é apenas o padrão de
+desenvolvimento.
+
 Faça login em `POST /login` enviando `email` e `senha`. A resposta contém o
 usuário e um `token` JWT. Envie o token em todas as rotas privadas:
 

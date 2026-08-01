@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import swaggerUi from "swagger-ui-express";
 
 import UsuariosController from "./controllers/UsuariosController.js";
 import AutenticacaoController from "./controllers/AutenticacaoController.js";
@@ -10,10 +11,13 @@ import TenantsController from "./controllers/TenantsController.js";
 import DocumentosController from "./controllers/DocumentosController.js";
 import validarApiKey from "./middlewares/validarApiKey.js";
 import validarResource from "./middlewares/validarResource.js";
+import { limiteAdmin, limiteLogin } from "./middlewares/rateLimits.js";
+import openapi from "./docs/openapi.js";
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+const corsOrigin = process.env.CORS_ORIGIN || "*";
+app.use(cors({ origin: corsOrigin === "*" ? "*" : corsOrigin.split(",").map((origem) => origem.trim()) }));
 
 const _usuariosController = new UsuariosController();
 const _autenticacaoController = new AutenticacaoController();
@@ -22,11 +26,13 @@ const _tenantsController = new TenantsController();
 const _documentosController = new DocumentosController();
 
 // rotas públicas
-app.post("/login", _autenticacaoController.login);
+app.get("/health", (_req, resp) => resp.status(200).json({ status: "ok" }));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi, { explorer: true }));
+app.post("/login", limiteLogin, _autenticacaoController.login);
 app.post("/usuarios", _usuariosController.adicionar);
 
 // Rota operacional; não deve ser exposta na documentação dos alunos.
-app.post("/admin/tenants", autenticarAdmin, _tenantsController.adicionar);
+app.post("/admin/tenants", limiteAdmin, autenticarAdmin, _tenantsController.adicionar);
 
 // API genérica multi-aluno: a API key identifica e isola o tenant.
 app.use("/v1", validarApiKey);
