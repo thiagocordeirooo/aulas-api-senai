@@ -5,6 +5,8 @@ import UsuariosController from "./controllers/UsuariosController.js";
 import AutenticacaoController from "./controllers/AutenticacaoController.js";
 import ClientesController from "./controllers/ClientesController.js";
 import autenticar from "./middlewares/autenticar.js";
+import autenticarAdmin from "./middlewares/autenticarAdmin.js";
+import TenantsController from "./controllers/TenantsController.js";
 
 const app = express();
 app.use(express.json());
@@ -13,10 +15,14 @@ app.use(cors({ origin: "*" }));
 const _usuariosController = new UsuariosController();
 const _autenticacaoController = new AutenticacaoController();
 const _clientesController = new ClientesController();
+const _tenantsController = new TenantsController();
 
 // rotas públicas
 app.post("/login", _autenticacaoController.login);
 app.post("/usuarios", _usuariosController.adicionar);
+
+// Rota operacional; não deve ser exposta na documentação dos alunos.
+app.post("/admin/tenants", autenticarAdmin, _tenantsController.adicionar);
 
 // Middleware de verificação do token JWT para todas as rotas seguintes.
 app.use(autenticar);
