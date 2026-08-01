@@ -2,13 +2,8 @@ import { calcularHashApiKey } from "../utils/apiKey.js";
 import { getPool } from "../database/ConexaoPostgres.js";
 
 function obterPrefixo(chave) {
-  const partes = chave.split("_");
-
-  if (partes.length !== 3 || partes[0] !== "ak" || !/^[a-f0-9]{8}$/.test(partes[1])) {
-    return null;
-  }
-
-  return `${partes[0]}_${partes[1]}`;
+  const resultado = /^((ak_[a-f0-9]{8}))_[A-Za-z0-9_-]+$/.exec(chave);
+  return resultado?.[1] || null;
 }
 
 export default async function validarApiKey(req, resp, next) {
