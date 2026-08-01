@@ -4,9 +4,7 @@ class ClientesController {
   async adicionar(req, resp) {
     try {
       const novoCliente = req.body;
-      const idUsuario = req.headers["x-usuario"];
-      console.log("ID do usuário logado:", idUsuario);
-      console.log("Dados do novo cliente:", novoCliente);
+      const idUsuario = req.user.id;
       if (!novoCliente.nome || !novoCliente.email) {
         resp.status(400).send("Os campos nome e email são obrigatórios.");
         return;
@@ -38,7 +36,7 @@ class ClientesController {
 
   async listar(req, resp) {
     try {
-      const idUsuarioLogado = req.headers["x-usuario"];
+      const idUsuarioLogado = req.user.id;
       const conexaoDB = await new ConexaoMySql().getConexao();
 
       const comandoSql =
@@ -58,7 +56,7 @@ class ClientesController {
 
   async buscarPeloId(req, resp) {
     try {
-      const idUsuarioLogado = req.headers["x-usuario"];
+      const idUsuarioLogado = req.user.id;
 
       const conexaoDB = await new ConexaoMySql().getConexao();
       const comandoSql =
@@ -79,7 +77,7 @@ class ClientesController {
   async atualizar(req, resp) {
     try {
       const clienteEditar = req.body;
-      const idUsuarioLogado = req.headers["x-usuario"];
+      const idUsuarioLogado = req.user.id;
       if (!clienteEditar.id || !clienteEditar.nome || !clienteEditar.email) {
         resp.status(400).send("Os campos id, nome e email são obrigatórios.");
         return;
@@ -109,7 +107,7 @@ class ClientesController {
 
   async excluir(req, resp) {
     try {
-      const idUsuario = req.headers["x-usuario"];
+      const idUsuario = req.user.id;
       const conexaoDB = await new ConexaoMySql().getConexao();
 
       const comandoSql = "DELETE FROM clientes WHERE id = ? AND idUsuario = ?";

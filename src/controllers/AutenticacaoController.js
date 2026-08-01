@@ -1,4 +1,5 @@
 import ConexaoMySql from "../database/ConexaoMySql.js";
+import jwt from "jsonwebtoken";
 
 class AutenticacaoController {
   async login(req, resp) {
@@ -21,8 +22,17 @@ class AutenticacaoController {
         resp.status(401).send("Email ou Senha incorreta.");
         return;
       }
-      delete usuarioEncontrado.senha;
-      resp.send(usuarioEncontrado);
+
+      const usuario = {
+        id: usuarioEncontrado.id,
+        nome: usuarioEncontrado.nome,
+        email: usuarioEncontrado.email,
+      };
+      const token = jwt.sign(usuario, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+      });
+
+      resp.json({ token, usuario });
     } catch (error) {
       resp.status(500).send(error);
     }

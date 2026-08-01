@@ -4,6 +4,7 @@ import express from "express";
 import UsuariosController from "./controllers/UsuariosController.js";
 import AutenticacaoController from "./controllers/AutenticacaoController.js";
 import ClientesController from "./controllers/ClientesController.js";
+import autenticar from "./middlewares/autenticar.js";
 
 const app = express();
 app.use(express.json());
@@ -17,25 +18,24 @@ const _clientesController = new ClientesController();
 app.post("/login", _autenticacaoController.login);
 app.post("/usuarios", _usuariosController.adicionar);
 
-// Midleware de verificação de usuário logado
-app.use((req, resp, next) => {
-  const usuarioLogado = req.headers["x-usuario"];
-  if (!usuarioLogado) {
-    resp.status(401).send();
-    return;
-  }
-  next();
-});
+// Middleware de verificação do token JWT para todas as rotas seguintes.
+app.use(autenticar);
 
 // rotas privadas
 app.get("/usuarios", _usuariosController.listar);
 app.put("/usuarios", _usuariosController.atualizar);
 app.delete("/usuarios/:id", _usuariosController.excluir);
 
+// nova rota para /me
+app.get("/me", (req, resp) => {
+  return resp.json({ user: req.user });
+});
+
 // rotas de clientes
 app.get("/clientes", _clientesController.listar);
 app.get("/clientes/:id", _clientesController.buscarPeloId);
 app.post("/clientes", _clientesController.adicionar);
+
 app.put("/clientes", _clientesController.atualizar);
 app.delete("/clientes/:id", _clientesController.excluir);
 

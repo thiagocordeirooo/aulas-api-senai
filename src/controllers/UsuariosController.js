@@ -34,9 +34,6 @@ class UsuariosController {
 
   async listar(req, resp) {
     try {
-      const usuarioLogado = req.headers["x-usuario"];
-      console.log(usuarioLogado);
-
       const conexao = await new ConexaoMySql().getConexao();
       const comandoSql = "SELECT * FROM usuarios WHERE nome LIKE ?";
 
