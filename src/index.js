@@ -7,6 +7,9 @@ import ClientesController from "./controllers/ClientesController.js";
 import autenticar from "./middlewares/autenticar.js";
 import autenticarAdmin from "./middlewares/autenticarAdmin.js";
 import TenantsController from "./controllers/TenantsController.js";
+import DocumentosController from "./controllers/DocumentosController.js";
+import validarApiKey from "./middlewares/validarApiKey.js";
+import validarResource from "./middlewares/validarResource.js";
 
 const app = express();
 app.use(express.json());
@@ -16,6 +19,7 @@ const _usuariosController = new UsuariosController();
 const _autenticacaoController = new AutenticacaoController();
 const _clientesController = new ClientesController();
 const _tenantsController = new TenantsController();
+const _documentosController = new DocumentosController();
 
 // rotas públicas
 app.post("/login", _autenticacaoController.login);
@@ -23,6 +27,14 @@ app.post("/usuarios", _usuariosController.adicionar);
 
 // Rota operacional; não deve ser exposta na documentação dos alunos.
 app.post("/admin/tenants", autenticarAdmin, _tenantsController.adicionar);
+
+// API genérica multi-aluno: a API key identifica e isola o tenant.
+app.use("/v1", validarApiKey);
+app.get("/v1/:resource", validarResource, _documentosController.listar);
+app.post("/v1/:resource", validarResource, _documentosController.adicionar);
+app.get("/v1/:resource/:id", validarResource, _documentosController.buscarPeloId);
+app.put("/v1/:resource/:id", validarResource, _documentosController.atualizar);
+app.delete("/v1/:resource/:id", validarResource, _documentosController.excluir);
 
 // Middleware de verificação do token JWT para todas as rotas seguintes.
 app.use(autenticar);
